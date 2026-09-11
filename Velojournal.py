@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk # für neuere, adaptive Widgets
 import sqlite3
 
@@ -23,7 +23,7 @@ cur.execute("""
 
 ## Root-Window Gui ##
 
-root = Tk()
+root = tk.Tk()
 root.title("Velojournal")
 root.geometry("800x650")
 
@@ -76,7 +76,7 @@ def delete():
 
 ### Eintrag bearbeiten
 def edit():
-    editor = Tk()
+    editor = tk.Tk()
     editor.title("Bearbeiten")
     editor.geometry("800x650")
 
@@ -139,6 +139,7 @@ def query():
     # Alles anzeigen
     cur.execute("SELECT *, oid FROM fahrten")
     fahrten = cur.fetchall()
+    print(fahrten)
 
     # Loop durch alle Fahrten, dabei alle zusammenschliessen zu 
     # einer String print_fahrten. fahrt[6] ist die oid
@@ -146,59 +147,73 @@ def query():
     for fahrt in fahrten:
         print_fahrten += fahrt[0] + ": " + fahrt[1] + " | " + str(fahrt[2]) + " km, " + str(fahrt[3]) + " m Aufstieg, " + str(fahrt[4]) + " m Abfahrt, " + str(fahrt[5]) + " Fahrzeit (" + str(fahrt[6]) +")\n"
 
-    query_label = ttk.Label(root, text=print_fahrten)
+    query_label = ttk.Label(menu, text=print_fahrten)
     query_label.grid(row=11, column=0, columnspan=2, padx=10, pady=5, sticky="w")
     con.commit()
     con.close()
 
+### Treeview-Table ###
+records = ttk.Frame(root)
+table = ttk.Treeview(records, columns = ("Datum", "Route", "Km", "Aufstieg", "Abstieg", "Zeit"), show = "headings")
+table.heading("Datum", text = "Datum")
+table.heading("Route", text = "Route")
+table.heading("Km", text = "Km")
+table.heading("Aufstieg", text = "Aufstieg")
+table.heading("Abstieg", text = "Abstieg")
+table.heading("Zeit", text = "Zeit")
+table.pack()
+records.pack()
 
 ### Labels ###
-datum_label = ttk.Label(root, text="Datum")
+menu = ttk.Frame(root)
+datum_label = ttk.Label(menu, text="Datum")
 datum_label.grid(row=0, column=0, padx=15, pady=5)
-route_label = ttk.Label(root, text="Route")
+route_label = ttk.Label(menu, text="Route")
 route_label.grid(row=1, column=0, pady=5)
-kilometer_label = ttk.Label(root, text="Kilometer")
+kilometer_label = ttk.Label(menu, text="Kilometer")
 kilometer_label.grid(row=2, column=0, pady=5)
-aufstieg_label = ttk.Label(root, text="Aufstieg")
+aufstieg_label = ttk.Label(menu, text="Aufstieg")
 aufstieg_label.grid(row=3, column=0, pady=5)
-abstieg_label = ttk.Label(root, text="Abstieg")
+abstieg_label = ttk.Label(menu, text="Abstieg")
 abstieg_label.grid(row=4, column=0, pady=5)
-zeit_label = ttk.Label(root, text="Zeit")
+zeit_label = ttk.Label(menu, text="Zeit")
 zeit_label.grid(row=5, column=0, pady=5)
-select_label = ttk.Label(root, text="ID")
+select_label = ttk.Label(menu, text="ID")
 select_label.grid(row=7, column=0, pady=5)
 
 ### Eingabefelder ###
-datum = ttk.Entry(root, width=80)
+datum = ttk.Entry(menu, width=80)
 datum.grid(row=0, column=1, padx=10)
-route = ttk.Entry(root, width=80)
+route = ttk.Entry(menu, width=80)
 route.grid(row=1, column=1)
-kilometer = ttk.Entry(root, width=80)
+kilometer = ttk.Entry(menu, width=80)
 kilometer.grid(row=2, column=1)
-aufstieg = ttk.Entry(root, width=80)
+aufstieg = ttk.Entry(menu, width=80)
 aufstieg.grid(row=3, column=1)
-abstieg = ttk.Entry(root, width=80)
+abstieg = ttk.Entry(menu, width=80)
 abstieg.grid(row=4, column=1)
-zeit = ttk.Entry(root, width=80)
+zeit = ttk.Entry(menu, width=80)
 zeit.grid(row=5, column=1)
-select_box = ttk.Entry(root, width=80)
+select_box = ttk.Entry(menu, width=80)
 select_box.grid(row=7, column=1)
 
 ### Submit-Button ###
-submit_button = ttk.Button(root, text="Fahrt hinzufügen", command=submit)
+submit_button = ttk.Button(menu, text="Fahrt hinzufügen", command=submit)
 submit_button.grid(row=6, column=1, padx=9, pady=5, sticky="w")
 
 ### Delete-Button ###
-delete_button = ttk.Button(root, text="Fahrt löschen", command=delete)
+delete_button = ttk.Button(menu, text="Fahrt löschen", command=delete)
 delete_button.grid(row=8, column=1, padx=9, pady=5, sticky="w")
 
 ### Update-Button ###
-edit_button = ttk.Button(root, text="Fahrt bearbeiten", command=edit)
+edit_button = ttk.Button(menu, text="Fahrt bearbeiten", command=edit)
 edit_button.grid(row=9, column=1, padx=9, pady=5, sticky="w")
 
 ### Query-Button ###
-query_button = ttk.Button(root, text="Fahrten anzeigen", command=query)
+query_button = ttk.Button(menu, text="Fahrten anzeigen", command=query)
 query_button.grid(row=10, column=1, padx=9, pady=5, sticky="w")
+
+menu.pack()
 
 ## Alle Änderungen übernehmen und Verbindung schliessen
 con.commit()
