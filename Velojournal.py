@@ -14,7 +14,7 @@ cur.execute("""
             CREATE TABLE IF NOT EXISTS fahrten (
             datum TEXT,
             route TEXT NOT NULL,
-            kilometer REAL,
+            distanz REAL,
             aufstieg INTEGER,
             abstieg INTEGER,
             zeit TEXT
@@ -34,11 +34,11 @@ def submit():
     con = sqlite3.connect(database)
     cur = con.cursor()
     # insert into table
-    cur.execute("insert into fahrten values(:datum, :route, :kilometer, :aufstieg, :abstieg, :zeit)",
+    cur.execute("insert into fahrten values(:datum, :route, :distanz, :aufstieg, :abstieg, :zeit)",
                 {
                     'datum': datum.get(),
                     'route': route.get(),
-                    'kilometer': kilometer.get(),
+                    'distanz': distanz.get(),
                     'aufstieg': aufstieg.get(),
                     'abstieg': abstieg.get(),
                     'zeit': zeit.get()
@@ -51,7 +51,7 @@ def submit():
     # clear textboxes
     datum.delete(0, END) # 0, END meint: von Anfang bis Ende
     route.delete(0, END)
-    kilometer.delete(0, END)
+    distanz.delete(0, END)
     aufstieg.delete(0, END)
     abstieg.delete(0, END)
     zeit.delete(0, END)
@@ -85,8 +85,8 @@ def edit():
     datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
     route_label_editor = ttk.Label(editor, text="Route")
     route_label_editor.grid(row=1, column=0, pady=5)
-    kilometer_label_editor = ttk.Label(editor, text="Kilometer")
-    kilometer_label_editor.grid(row=2, column=0, pady=5)
+    distanz = ttk.Label(editor, text="Distanz")
+    distanz.grid(row=2, column=0, pady=5)
     aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
     aufstieg_label_editor.grid(row=3, column=0, pady=5)
     abstieg_label_editor = ttk.Label(editor, text="Abstieg")
@@ -99,8 +99,8 @@ def edit():
     datum_editor.grid(row=0, column=1, padx=10)
     route_editor = ttk.Entry(editor, width=80)
     route_editor.grid(row=1, column=1)
-    kilometer_editor = ttk.Entry(editor, width=80)
-    kilometer_editor.grid(row=2, column=1)
+    distanz = ttk.Entry(editor, width=80)
+    distanz.grid(row=2, column=1)
     aufstieg_editor = ttk.Entry(editor, width=80)
     aufstieg_editor.grid(row=3, column=1)
     abstieg_editor = ttk.Entry(editor, width=80)
@@ -121,7 +121,7 @@ def edit():
     for record in records:
         datum_editor.insert(0, record[0]) # 0 = Stelle, wo item eingefügt
         route_editor.insert(0, record[1]) # 0 = Stelle, wo item eingefügt
-        kilometer_editor.insert(0, record[2]) # 0 = Stelle, wo item eingefügt
+        distanz.insert(0, record[2]) # 0 = Stelle, wo item eingefügt
         aufstieg_editor.insert(0, record[3]) # 0 = Stelle, wo item eingefügt
         abstieg_editor.insert(0, record[4]) # 0 = Stelle, wo item eingefügt
         zeit_editor.insert(0, record[5]) # 0 = Stelle, wo item eingefügt
@@ -137,32 +137,54 @@ def query():
     con = sqlite3.connect(database)
     cur = con.cursor()
     # Alles anzeigen
-    cur.execute("SELECT *, oid FROM fahrten")
+    cur.execute("SELECT * FROM fahrten")
     fahrten = cur.fetchall()
-    print(fahrten)
 
-    # Loop durch alle Fahrten, dabei alle zusammenschliessen zu 
-    # einer String print_fahrten. fahrt[6] ist die oid
-    print_fahrten = ""
     for fahrt in fahrten:
-        print_fahrten += fahrt[0] + ": " + fahrt[1] + " | " + str(fahrt[2]) + " km, " + str(fahrt[3]) + " m Aufstieg, " + str(fahrt[4]) + " m Abfahrt, " + str(fahrt[5]) + " Fahrzeit (" + str(fahrt[6]) +")\n"
+        table.insert(parent='', index='end', text='', values=(fahrt[0], fahrt[1], fahrt[2], fahrt[3], fahrt[4], fahrt[5]))
 
-    query_label = ttk.Label(menu, text=print_fahrten)
-    query_label.grid(row=11, column=0, columnspan=2, padx=10, pady=5, sticky="w")
+        #print_fahrten += fahrt[0] + ": " + fahrt[1] + " | " + str(fahrt[2]) + " km, " + str(fahrt[3]) + " m Aufstieg, " + str(fahrt[4]) + " m Abfahrt, " + str(fahrt[5]) + " Fahrzeit (" + str(fahrt[6]) +")\n"
+
     con.commit()
     con.close()
 
-### Treeview-Table ###
-records = ttk.Frame(root)
-table = ttk.Treeview(records, columns = ("Datum", "Route", "Km", "Aufstieg", "Abstieg", "Zeit"), show = "headings")
-table.heading("Datum", text = "Datum")
-table.heading("Route", text = "Route")
-table.heading("Km", text = "Km")
-table.heading("Aufstieg", text = "Aufstieg")
-table.heading("Abstieg", text = "Abstieg")
-table.heading("Zeit", text = "Zeit")
+## Treeview-Table ##
+
+### Create the Frame ###
+tree_frame = ttk.Frame(root)
+tree_frame.pack()
+
+### Create the Scrollbar ###
+tree_scroll = ttk.Scrollbar(tree_frame)
+tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+### Create the Treeview-Table ###
+table = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, selectmode="extended")
 table.pack()
-records.pack()
+
+### Configure Scrollbar ###
+tree_scroll.config(command=table.yview)
+
+### Define Columns ###
+table['columns'] = ("Datum", "Route", "Distanz", "Aufstieg", "Abstieg", "Zeit")
+
+### Format Columns ###
+table.column("#0", width=0, stretch=tk.NO)
+table.column("Datum", anchor=tk.W, width=80)
+table.column("Route", anchor=tk.W, width=400)
+table.column("Distanz", anchor=tk.E, width=70)
+table.column("Aufstieg", anchor=tk.E, width=70)
+table.column("Abstieg", anchor=tk.E, width=70)
+table.column("Zeit", anchor=tk.E, width=50)
+
+### Create Headings ###
+table.heading("#0", text = "")
+table.heading("Datum", text = "Datum", anchor=tk.W)
+table.heading("Route", text = "Route", anchor=tk.W)
+table.heading("Distanz", text = "Distanz", anchor=tk.CENTER)
+table.heading("Aufstieg", text = "Aufstieg", anchor=tk.CENTER)
+table.heading("Abstieg", text = "Abstieg", anchor=tk.CENTER)
+table.heading("Zeit", text = "Zeit", anchor=tk.CENTER)
 
 ### Labels ###
 menu = ttk.Frame(root)
@@ -170,8 +192,8 @@ datum_label = ttk.Label(menu, text="Datum")
 datum_label.grid(row=0, column=0, padx=15, pady=5)
 route_label = ttk.Label(menu, text="Route")
 route_label.grid(row=1, column=0, pady=5)
-kilometer_label = ttk.Label(menu, text="Kilometer")
-kilometer_label.grid(row=2, column=0, pady=5)
+distanz = ttk.Label(menu, text="Distanz")
+distanz.grid(row=2, column=0, pady=5)
 aufstieg_label = ttk.Label(menu, text="Aufstieg")
 aufstieg_label.grid(row=3, column=0, pady=5)
 abstieg_label = ttk.Label(menu, text="Abstieg")
@@ -186,8 +208,8 @@ datum = ttk.Entry(menu, width=80)
 datum.grid(row=0, column=1, padx=10)
 route = ttk.Entry(menu, width=80)
 route.grid(row=1, column=1)
-kilometer = ttk.Entry(menu, width=80)
-kilometer.grid(row=2, column=1)
+distanz = ttk.Entry(menu, width=80)
+distanz.grid(row=2, column=1)
 aufstieg = ttk.Entry(menu, width=80)
 aufstieg.grid(row=3, column=1)
 abstieg = ttk.Entry(menu, width=80)
@@ -218,6 +240,8 @@ menu.pack()
 ## Alle Änderungen übernehmen und Verbindung schliessen
 con.commit()
 con.close()
+
+query()
 
 ## Loop ##
 root.mainloop()
