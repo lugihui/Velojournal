@@ -288,7 +288,7 @@ table.pack()
 tree_scroll.config(command=table.yview)
 
 ### Define Columns ###
-table['columns'] = ("Datum", "Route", "Distanz", "Aufstieg", "Abstieg", "Zeit", "ID")
+table['columns'] = ("Datum", "Route", "Distanz", "Aufstieg", "Abstieg", "Zeit")
 
 ### Format Columns ###
 table.column("#0", width=0, stretch=tk.NO)
@@ -298,7 +298,6 @@ table.column("Distanz", anchor=tk.E, width=70)
 table.column("Aufstieg", anchor=tk.E, width=70)
 table.column("Abstieg", anchor=tk.E, width=70)
 table.column("Zeit", anchor=tk.E, width=50)
-table.column("ID", anchor=tk.E, width=50)
 
 ### Create Headings ###
 table.heading("#0", text = "")
@@ -308,7 +307,6 @@ table.heading("Distanz", text = "Distanz", anchor=tk.CENTER)
 table.heading("Aufstieg", text = "Aufstieg", anchor=tk.CENTER)
 table.heading("Abstieg", text = "Abstieg", anchor=tk.CENTER)
 table.heading("Zeit", text = "Zeit", anchor=tk.CENTER)
-table.heading("ID", text = "ID", anchor=tk.CENTER)
 
 ### Frame Menu ###
 menu = ttk.Frame(root)
@@ -326,8 +324,6 @@ abstieg_label = ttk.Label(menu, text="Abstieg")
 abstieg_label.grid(row=4, column=0, pady=5)
 zeit_label = ttk.Label(menu, text="Zeit")
 zeit_label.grid(row=5, column=0, pady=5)
-select_label = ttk.Label(menu, text="ID")
-select_label.grid(row=7, column=0, pady=5)
 
 ### Eingabefelder ###
 datum = ttk.Entry(menu, width=80)
@@ -342,8 +338,6 @@ abstieg = ttk.Entry(menu, width=80)
 abstieg.grid(row=4, column=1)
 zeit = ttk.Entry(menu, width=80)
 zeit.grid(row=5, column=1)
-select_box = ttk.Entry(menu, width=80)
-select_box.grid(row=7, column=1)
 
 ### Submit-Button ###
 submit_button = ttk.Button(menu, text="Fahrt hinzufügen", command=submit)
@@ -351,16 +345,13 @@ submit_button.grid(row=6, column=1, padx=9, pady=5, sticky="w")
 
 ### Delete-Button ###
 delete_button = ttk.Button(menu, text="Fahrt löschen", command=delete)
-delete_button.grid(row=8, column=1, padx=9, pady=5, sticky="w")
+delete_button.grid(row=7, column=1, padx=9, pady=5, sticky="w")
 
 ### Update-Button ###
 edit_button = ttk.Button(menu, text="Fahrt bearbeiten", command=edit)
-edit_button.grid(row=9, column=1, padx=9, pady=5, sticky="w")
+edit_button.grid(row=8, column=1, padx=9, pady=5, sticky="w")
 
-### Query-Button ###
-query_button = ttk.Button(menu, text="Fahrten anzeigen", command=query)
-query_button.grid(row=10, column=1, padx=9, pady=5, sticky="w")
-
+### Menu anzeigen
 menu.pack()
 
 ## Alle Änderungen übernehmen und Verbindung schliessen
@@ -369,7 +360,7 @@ con.close()
 
 # Bind the treeview
 table.bind("<ButtonRelease-1>", select_record) # select_record oben definiert
-table.bind("<Double-Button-1>", edit_in_editor) # TODO: Soll direkt edit-Fenster öffnen, langfristig nur noch so editieren...
+table.bind("<Double-Button-1>", edit_in_editor) # Doppelklick für Editor
 
 # Anzeige der Daten aus Datenbank beim Start
 query()
