@@ -2,6 +2,18 @@ import tkinter as tk
 from tkinter import ttk # für neuere, adaptive Widgets
 import sqlite3
 
+"""
+TODOs:
+- Update-Funktion zum funktionieren bringen
+- Jetzige Eingabemaske in neues Fenster verschieben, das nur noch bei Klick auf "Neuer Eintrag" erscheint
+- Widgets und Events für Suche und Sortieren erstellen.
+  - Prio 1: Suche in Zeitspanne
+  - Prio 2: Suche nach Kilometern
+- Zusammenfassung anzeigen
+  - Total Distanz
+  - Total Aufstieg
+  - Total Abstieg
+"""
 
 ## Database ##
 
@@ -21,11 +33,6 @@ cur.execute("""
             )
             """)
 
-## Root-Window Gui ##
-
-root = tk.Tk()
-root.title("Velojournal")
-root.geometry("800x650")
 
 ## Events
 
@@ -67,9 +74,11 @@ def select_record(e):
     zeit.delete(0, tk.END)
 
     # grab record number
-    selected = table.focus()
+    selected = table.focus() # selected = Zeilennummer Treeview
+
     # grab record values
-    values = table.item(selected, 'values')
+    values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings)
+    # (value[6] == oid)
 
     # outputs to entry boxes
     datum.insert(0, values[0]) # 0, END meint: von Anfang bis Ende
@@ -79,10 +88,48 @@ def select_record(e):
     abstieg.insert(0, values[4])
     zeit.insert(0, values[5])
 
-### Eintrag updaten ###
+### eintrag updaten ###
 def update():
-    pass
-    #TODO: Funktion update record in database
+    # grab the record number
+    # selected = table.focus()
+    # update record in treeview
+    # table.item(selected, text="", values=(datum_editor.get(), route_editor.get(),distanz_editor.get(), aufstieg_editor.get(), abstieg_editor.get(), zeit_editor.get(),))
+
+    record_id = select_box.get()
+
+    # update record in database
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+
+    cur.execute("""UPDATE fahrten SET
+                datum = :datum,
+                route = :route,
+                distanz = :distanz,
+                aufstieg = :aufstieg,
+                abstieg = :abstieg,
+                zeit = :zeit
+                WHERE oid = :oid
+                """,
+                {
+                    'datum': datum_editor.get(),
+                    'route': route_editor.get(),
+                    'distanz': distanz_editor.get(),
+                    'aufstieg': aufstieg_editor.get(),
+                    'abstieg': abstieg_editor.get(),
+                    'zeit': zeit_editor.get(),
+                    'oid': record_id
+                    }
+                )
+    con.commit()
+    con.close()
+
+    # clear textboxes
+    datum.delete(0, tk.END) # 0, END meint: von Anfang bis Ende
+    route.delete(0, tk.END)
+    distanz.delete(0, tk.END)
+    aufstieg.delete(0, tk.END)
+    abstieg.delete(0, tk.END)
+    zeit.delete(0, tk.END)
 
 ### Eintrag löschen ###
 def delete():
@@ -97,6 +144,81 @@ def delete():
     # Clear Select-Box
     select_box.delete(0, tk.END)
 
+### Editor öffnen und Eintrag bearbeiten ###
+def edit_in_editor(e):
+
+    # Fenster Editor öffnen
+    editor = tk.Tk()
+    editor.title("Bearbeiten")
+    editor.geometry("600x250")
+
+    # Labels
+    datum_label_editor = ttk.Label(editor, text="Datum")
+    datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
+    route_label_editor = ttk.Label(editor, text="Route")
+    route_label_editor.grid(row=1, column=0, pady=5)
+    distanz_label_editor = ttk.Label(editor, text="Distanz")
+    distanz_label_editor.grid(row=2, column=0, pady=5)
+    aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
+    aufstieg_label_editor.grid(row=3, column=0, pady=5)
+    abstieg_label_editor = ttk.Label(editor, text="Abstieg")
+    abstieg_label_editor.grid(row=4, column=0, pady=5)
+    zeit_label_editor = ttk.Label(editor, text="Zeit")
+    zeit_label_editor.grid(row=5, column=0, pady=5)
+
+    # Create global variables (for update-function)
+    global datum_editor
+    global route_editor
+    global distanz_editor
+    global aufstieg_editor
+    global abstieg_editor
+    global zeit_editor
+
+    # Eingabefelder
+    datum_editor = ttk.Entry(editor, width=60)
+    datum_editor.grid(row=0, column=1, padx=20)
+    route_editor = ttk.Entry(editor, width=60)
+    route_editor.grid(row=1, column=1)
+    distanz_editor = ttk.Entry(editor, width=60)
+    distanz_editor.grid(row=2, column=1)
+    aufstieg_editor = ttk.Entry(editor, width=60)
+    aufstieg_editor.grid(row=3, column=1)
+    abstieg_editor = ttk.Entry(editor, width=60)
+    abstieg_editor.grid(row=4, column=1)
+    zeit_editor = ttk.Entry(editor, width=60)
+    zeit_editor.grid(row=5, column=1)
+
+    # close-function
+    def safe_and_close():
+        update()
+        editor.destroy()
+
+    # Save-Button for edited entry
+    submit_button_editor = ttk.Button(editor, text="Speichern", command=safe_and_close)
+    submit_button_editor.grid(row=6, column=1, padx=20, pady=5, sticky="e")
+
+    # get Zeilennummer Treeview
+    selected = table.focus() # selected = Zeilennummer Treeview
+
+    # get Werte dieser Zeile
+    values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings), (value[6] == oid)
+
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM fahrten WHERE oid=" + values[6])
+    records = cur.fetchall()
+    # Loop through result - a bit odd, because it is always one record...
+    for record in records:
+        datum_editor.insert(0, record[0]) # 0 = Stelle, wo item eingefügt
+        route_editor.insert(0, record[1]) # 0 = Stelle, wo item eingefügt
+        distanz_editor.insert(0, record[2]) # 0 = Stelle, wo item eingefügt
+        aufstieg_editor.insert(0, record[3]) # 0 = Stelle, wo item eingefügt
+        abstieg_editor.insert(0, record[4]) # 0 = Stelle, wo item eingefügt
+        zeit_editor.insert(0, record[5]) # 0 = Stelle, wo item eingefügt
+
+    con.commit()
+    con.close()
+
 ### Eintrag bearbeiten
 def edit():
     editor = tk.Tk()
@@ -108,8 +230,8 @@ def edit():
     datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
     route_label_editor = ttk.Label(editor, text="Route")
     route_label_editor.grid(row=1, column=0, pady=5)
-    distanz = ttk.Label(editor, text="Distanz")
-    distanz.grid(row=2, column=0, pady=5)
+    distanz_label_editor = ttk.Label(editor, text="Distanz")
+    distanz_label_editor.grid(row=2, column=0, pady=5)
     aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
     aufstieg_label_editor.grid(row=3, column=0, pady=5)
     abstieg_label_editor = ttk.Label(editor, text="Abstieg")
@@ -117,13 +239,21 @@ def edit():
     zeit_label_editor = ttk.Label(editor, text="Zeit")
     zeit_label_editor.grid(row=5, column=0, pady=5)
 
+    ### Create global variables (for update-function)
+    global datum_editor
+    global route_editor
+    global distanz_editor
+    global aufstieg_editor
+    global abstieg_editor
+    global zeit_editor
+
     ### Eingabefelder ###
     datum_editor = ttk.Entry(editor, width=80)
     datum_editor.grid(row=0, column=1, padx=10)
     route_editor = ttk.Entry(editor, width=80)
     route_editor.grid(row=1, column=1)
-    distanz = ttk.Entry(editor, width=80)
-    distanz.grid(row=2, column=1)
+    distanz_editor = ttk.Entry(editor, width=80)
+    distanz_editor.grid(row=2, column=1)
     aufstieg_editor = ttk.Entry(editor, width=80)
     aufstieg_editor.grid(row=3, column=1)
     abstieg_editor = ttk.Entry(editor, width=80)
@@ -137,14 +267,13 @@ def edit():
 
     con = sqlite3.connect(database)
     cur = con.cursor()
-    record_id = select_box.get()
-    cur.execute("SELECT * FROM fahrten WHERE oid=" + record_id)
+    cur.execute("SELECT * FROM fahrten WHERE oid=" + select_box.get())
     records = cur.fetchall()
     # Loop through result - a bit odd, because it is always one record...
     for record in records:
         datum_editor.insert(0, record[0]) # 0 = Stelle, wo item eingefügt
         route_editor.insert(0, record[1]) # 0 = Stelle, wo item eingefügt
-        distanz.insert(0, record[2]) # 0 = Stelle, wo item eingefügt
+        distanz_editor.insert(0, record[2]) # 0 = Stelle, wo item eingefügt
         aufstieg_editor.insert(0, record[3]) # 0 = Stelle, wo item eingefügt
         abstieg_editor.insert(0, record[4]) # 0 = Stelle, wo item eingefügt
         zeit_editor.insert(0, record[5]) # 0 = Stelle, wo item eingefügt
@@ -170,6 +299,17 @@ def query():
 
     con.commit()
     con.close()
+
+
+#####################
+##       Gui       ##
+#####################
+
+
+## Root-Window
+root = tk.Tk()
+root.title("Velojournal")
+root.geometry("800x650")
 
 ## Treeview-Table ##
 
@@ -211,14 +351,16 @@ table.heading("Abstieg", text = "Abstieg", anchor=tk.CENTER)
 table.heading("Zeit", text = "Zeit", anchor=tk.CENTER)
 table.heading("ID", text = "ID", anchor=tk.CENTER)
 
-### Labels ###
+### Frame Menu ###
 menu = ttk.Frame(root)
+
+### Labels Menu ###
 datum_label = ttk.Label(menu, text="Datum")
 datum_label.grid(row=0, column=0, padx=15, pady=5)
 route_label = ttk.Label(menu, text="Route")
 route_label.grid(row=1, column=0, pady=5)
-distanz = ttk.Label(menu, text="Distanz")
-distanz.grid(row=2, column=0, pady=5)
+distanz_label = ttk.Label(menu, text="Distanz")
+distanz_label.grid(row=2, column=0, pady=5)
 aufstieg_label = ttk.Label(menu, text="Aufstieg")
 aufstieg_label.grid(row=3, column=0, pady=5)
 abstieg_label = ttk.Label(menu, text="Abstieg")
@@ -268,6 +410,7 @@ con.close()
 
 # Bind the treeview
 table.bind("<ButtonRelease-1>", select_record) # select_record oben definiert
+table.bind("<Double-Button-1>", edit_in_editor) # TODO: Soll direkt edit-Fenster öffnen, langfristig nur noch so editieren...
 
 # Anzeige der Daten aus Datenbank beim Start
 query()
