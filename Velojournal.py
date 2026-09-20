@@ -4,7 +4,6 @@ import sqlite3
 
 """
 TODOs:
-- Update-Funktion zum funktionieren bringen
 - Jetzige Eingabemaske in neues Fenster verschieben, das nur noch bei Klick auf "Neuer Eintrag" erscheint
 - Widgets und Events für Suche und Sortieren erstellen.
   - Prio 1: Suche in Zeitspanne
@@ -143,13 +142,6 @@ def select_record(e):
 
 ### eintrag updaten ###
 def update():
-    # grab the record number
-    # selected = table.focus()
-    # update record in treeview
-    # table.item(selected, text="", values=(datum_editor.get(), route_editor.get(),distanz_editor.get(), aufstieg_editor.get(), abstieg_editor.get(), zeit_editor.get(),))
-
-    record_id = select_box.get()
-
     # update record in database
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -170,19 +162,18 @@ def update():
                     'aufstieg': aufstieg_editor.get(),
                     'abstieg': abstieg_editor.get(),
                     'zeit': zeit_editor.get(),
-                    'oid': record_id
+                    'oid': oid_edited
                     }
                 )
     con.commit()
     con.close()
 
-    # clear textboxes
-    datum.delete(0, tk.END) # 0, END meint: von Anfang bis Ende
-    route.delete(0, tk.END)
-    distanz.delete(0, tk.END)
-    aufstieg.delete(0, tk.END)
-    abstieg.delete(0, tk.END)
-    zeit.delete(0, tk.END)
+    # Update record in Treeview
+    # grab the record number
+    selected = table.focus()
+    # update record in treeview
+    table.item(selected, text="", values=(datum_editor.get(), route_editor.get(),distanz_editor.get(), aufstieg_editor.get(), abstieg_editor.get(), zeit_editor.get(),))
+
 
 ### Eintrag löschen ###
 def delete():
@@ -209,9 +200,12 @@ def edit_in_editor(e):
     # get Werte dieser Zeile
     values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings), (value[6] == oid)
 
+    global oid_edited
+    oid_edited = values[6]
+
     con = sqlite3.connect(database)
     cur = con.cursor()
-    cur.execute("SELECT * FROM fahrten WHERE oid=" + values[6])
+    cur.execute("SELECT * FROM fahrten WHERE oid=" + oid_edited)
     records = cur.fetchall()
     # Loop through result - a bit odd, because it is always one record...
     for record in records:
