@@ -36,6 +36,59 @@ cur.execute("""
 
 ## Events
 
+# Editor öffnen
+def open_editor():
+    # Fenster Editor öffnen
+    editor = tk.Tk()
+    editor.title("Bearbeiten")
+    editor.geometry("600x250")
+
+    # Labels
+    datum_label_editor = ttk.Label(editor, text="Datum")
+    datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
+    route_label_editor = ttk.Label(editor, text="Route")
+    route_label_editor.grid(row=1, column=0, pady=5)
+    distanz_label_editor = ttk.Label(editor, text="Distanz")
+    distanz_label_editor.grid(row=2, column=0, pady=5)
+    aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
+    aufstieg_label_editor.grid(row=3, column=0, pady=5)
+    abstieg_label_editor = ttk.Label(editor, text="Abstieg")
+    abstieg_label_editor.grid(row=4, column=0, pady=5)
+    zeit_label_editor = ttk.Label(editor, text="Zeit")
+    zeit_label_editor.grid(row=5, column=0, pady=5)
+
+    # Create global variables (for update-function)
+    global datum_editor
+    global route_editor
+    global distanz_editor
+    global aufstieg_editor
+    global abstieg_editor
+    global zeit_editor
+
+    # Eingabefelder
+    datum_editor = ttk.Entry(editor, width=60)
+    datum_editor.grid(row=0, column=1, padx=20)
+    route_editor = ttk.Entry(editor, width=60)
+    route_editor.grid(row=1, column=1)
+    distanz_editor = ttk.Entry(editor, width=60)
+    distanz_editor.grid(row=2, column=1)
+    aufstieg_editor = ttk.Entry(editor, width=60)
+    aufstieg_editor.grid(row=3, column=1)
+    abstieg_editor = ttk.Entry(editor, width=60)
+    abstieg_editor.grid(row=4, column=1)
+    zeit_editor = ttk.Entry(editor, width=60)
+    zeit_editor.grid(row=5, column=1)
+
+    # close-function
+    def safe_and_close():
+        update()
+        editor.destroy()
+
+    # Save-Button for edited entry
+    submit_button_editor = ttk.Button(editor, text="Speichern", command=safe_and_close)
+    submit_button_editor.grid(row=6, column=1, padx=20, pady=5, sticky="e")
+
+
 ### neuen eintrag speichern
 def submit():
     con = sqlite3.connect(database)
@@ -144,58 +197,11 @@ def delete():
     # Clear Select-Box
     select_box.delete(0, tk.END)
 
-### Editor öffnen und Eintrag bearbeiten ###
+### editor öffnen und eintrag bearbeiten ###
 def edit_in_editor(e):
 
-    # Fenster Editor öffnen
-    editor = tk.Tk()
-    editor.title("Bearbeiten")
-    editor.geometry("600x250")
-
-    # Labels
-    datum_label_editor = ttk.Label(editor, text="Datum")
-    datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
-    route_label_editor = ttk.Label(editor, text="Route")
-    route_label_editor.grid(row=1, column=0, pady=5)
-    distanz_label_editor = ttk.Label(editor, text="Distanz")
-    distanz_label_editor.grid(row=2, column=0, pady=5)
-    aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
-    aufstieg_label_editor.grid(row=3, column=0, pady=5)
-    abstieg_label_editor = ttk.Label(editor, text="Abstieg")
-    abstieg_label_editor.grid(row=4, column=0, pady=5)
-    zeit_label_editor = ttk.Label(editor, text="Zeit")
-    zeit_label_editor.grid(row=5, column=0, pady=5)
-
-    # Create global variables (for update-function)
-    global datum_editor
-    global route_editor
-    global distanz_editor
-    global aufstieg_editor
-    global abstieg_editor
-    global zeit_editor
-
-    # Eingabefelder
-    datum_editor = ttk.Entry(editor, width=60)
-    datum_editor.grid(row=0, column=1, padx=20)
-    route_editor = ttk.Entry(editor, width=60)
-    route_editor.grid(row=1, column=1)
-    distanz_editor = ttk.Entry(editor, width=60)
-    distanz_editor.grid(row=2, column=1)
-    aufstieg_editor = ttk.Entry(editor, width=60)
-    aufstieg_editor.grid(row=3, column=1)
-    abstieg_editor = ttk.Entry(editor, width=60)
-    abstieg_editor.grid(row=4, column=1)
-    zeit_editor = ttk.Entry(editor, width=60)
-    zeit_editor.grid(row=5, column=1)
-
-    # close-function
-    def safe_and_close():
-        update()
-        editor.destroy()
-
-    # Save-Button for edited entry
-    submit_button_editor = ttk.Button(editor, text="Speichern", command=safe_and_close)
-    submit_button_editor.grid(row=6, column=1, padx=20, pady=5, sticky="e")
+    # Editor öffnen
+    open_editor()
 
     # get Zeilennummer Treeview
     selected = table.focus() # selected = Zeilennummer Treeview
@@ -221,49 +227,8 @@ def edit_in_editor(e):
 
 ### Eintrag bearbeiten
 def edit():
-    editor = tk.Tk()
-    editor.title("Bearbeiten")
-    editor.geometry("800x650")
 
-    ### Labels ###
-    datum_label_editor = ttk.Label(editor, text="Datum")
-    datum_label_editor.grid(row=0, column=0, padx=15, pady=5)
-    route_label_editor = ttk.Label(editor, text="Route")
-    route_label_editor.grid(row=1, column=0, pady=5)
-    distanz_label_editor = ttk.Label(editor, text="Distanz")
-    distanz_label_editor.grid(row=2, column=0, pady=5)
-    aufstieg_label_editor = ttk.Label(editor, text="Aufstieg")
-    aufstieg_label_editor.grid(row=3, column=0, pady=5)
-    abstieg_label_editor = ttk.Label(editor, text="Abstieg")
-    abstieg_label_editor.grid(row=4, column=0, pady=5)
-    zeit_label_editor = ttk.Label(editor, text="Zeit")
-    zeit_label_editor.grid(row=5, column=0, pady=5)
-
-    ### Create global variables (for update-function)
-    global datum_editor
-    global route_editor
-    global distanz_editor
-    global aufstieg_editor
-    global abstieg_editor
-    global zeit_editor
-
-    ### Eingabefelder ###
-    datum_editor = ttk.Entry(editor, width=80)
-    datum_editor.grid(row=0, column=1, padx=10)
-    route_editor = ttk.Entry(editor, width=80)
-    route_editor.grid(row=1, column=1)
-    distanz_editor = ttk.Entry(editor, width=80)
-    distanz_editor.grid(row=2, column=1)
-    aufstieg_editor = ttk.Entry(editor, width=80)
-    aufstieg_editor.grid(row=3, column=1)
-    abstieg_editor = ttk.Entry(editor, width=80)
-    abstieg_editor.grid(row=4, column=1)
-    zeit_editor = ttk.Entry(editor, width=80)
-    zeit_editor.grid(row=5, column=1)
-
-    ### Save-Button for edited entry ###
-    submit_button_editor = ttk.Button(editor, text="Speichern", command=update)
-    submit_button_editor.grid(row=6, column=1, padx=9, pady=5, sticky="w")
+    open_editor()
 
     con = sqlite3.connect(database)
     cur = con.cursor()
