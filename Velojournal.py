@@ -4,8 +4,9 @@ import sqlite3
 
 """
 TODOs:
-- Jetzige Eingabemaske in neues Fenster verschieben, das nur noch bei Klick auf "Neuer Eintrag" erscheint
-- Widgets und Events für Suche und Sortieren erstellen.
+- Eingabemaske für neue Einträge anders gestalten
+- Buttons "Fahrt löschen" bzw. "Fahrt bearbeiten" anders anordnen
+- widgets und events für suche und sortieren erstellen.
   - Prio 1: Suche in Zeitspanne
   - Prio 2: Suche nach Kilometern
 - Zusammenfassung anzeigen
@@ -120,28 +121,12 @@ def submit():
 
 ### Eintrag auswählen ###
 def select_record(e):
-    # clear textboxes
-    datum.delete(0, tk.END) # 0, END meint: von Anfang bis Ende
-    route.delete(0, tk.END)
-    distanz.delete(0, tk.END)
-    aufstieg.delete(0, tk.END)
-    abstieg.delete(0, tk.END)
-    zeit.delete(0, tk.END)
-
     # grab record number
     selected = table.focus() # selected = Zeilennummer Treeview
 
     # grab record values
     values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings)
     # (value[6] == oid)
-
-    # outputs to entry boxes
-    datum.insert(0, values[0]) # 0, END meint: von Anfang bis Ende
-    route.insert(0, values[1])
-    distanz.insert(0, values[2])
-    aufstieg.insert(0, values[3])
-    abstieg.insert(0, values[4])
-    zeit.insert(0, values[5])
 
 ### eintrag updaten ###
 def update():
@@ -234,9 +219,18 @@ def edit():
 
     open_editor()
 
+    # get Zeilennummer Treeview
+    selected = table.focus() # selected = Zeilennummer Treeview
+
+    # get Werte dieser Zeile
+    values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings), (value[6] == oid)
+
+    global oid_edited
+    oid_edited = values[6]
+
     con = sqlite3.connect(database)
     cur = con.cursor()
-    cur.execute("SELECT * FROM fahrten WHERE oid=" + select_box.get())
+    cur.execute("SELECT * FROM fahrten WHERE oid=" + oid_edited)
     records = cur.fetchall()
     # Loop through result - a bit odd, because it is always one record...
     for record in records:
@@ -249,9 +243,6 @@ def edit():
 
     con.commit()
     con.close()
-
-    # clear select-box
-    select_box.delete(0, tk.END)
 
 ### Einträge anzeigen
 def query():
