@@ -4,6 +4,7 @@ import sqlite3
 
 """
 TODOs:
+- Fahrt lässt sich nicht zweimal bearbeiten - warum?
 - Eingabemaske für neue Einträge anders gestalten
 - Buttons "Fahrt löschen" bzw. "Fahrt bearbeiten" anders anordnen
 - widgets und events für suche und sortieren erstellen.
@@ -313,44 +314,44 @@ table.heading("Zeit", text = "Zeit", anchor=tk.CENTER)
 menu = ttk.Frame(root)
 
 ### labels menu ###
-datum_label = ttk.Label(menu, text="datum")
-datum_label.grid(row=0, column=0, padx=15, pady=5)
-route_label = ttk.Label(menu, text="route")
-route_label.grid(row=1, column=0, pady=5)
-distanz_label = ttk.Label(menu, text="distanz")
+datum_label = ttk.Label(menu, text="Datum")
+datum_label.grid(row=1, column=0, padx=15, pady=5)
+route_label = ttk.Label(menu, text="Route")
+route_label.grid(row=1, column=2, pady=5)
+distanz_label = ttk.Label(menu, text="Distanz")
 distanz_label.grid(row=2, column=0, pady=5)
-aufstieg_label = ttk.Label(menu, text="aufstieg")
-aufstieg_label.grid(row=3, column=0, pady=5)
-abstieg_label = ttk.Label(menu, text="abstieg")
-abstieg_label.grid(row=4, column=0, pady=5)
-zeit_label = ttk.Label(menu, text="zeit")
-zeit_label.grid(row=5, column=0, pady=5)
+aufstieg_label = ttk.Label(menu, text="Aufstieg")
+aufstieg_label.grid(row=2, column=2, pady=5)
+abstieg_label = ttk.Label(menu, text="Abstieg")
+abstieg_label.grid(row=2, column=4, pady=5)
+zeit_label = ttk.Label(menu, text="Zeit")
+zeit_label.grid(row=2, column=6, pady=5)
 
 ### eingabefelder ###
-datum = ttk.Entry(menu, width=80)
-datum.grid(row=0, column=1, padx=10)
-route = ttk.Entry(menu, width=80)
-route.grid(row=1, column=1)
-distanz = ttk.Entry(menu, width=80)
+datum = ttk.Entry(menu, width=10)
+datum.grid(row=1, column=1, padx=10)
+route = ttk.Entry(menu, width=55)
+route.grid(row=1, column=3, columnspan=5)
+distanz = ttk.Entry(menu, width=10)
 distanz.grid(row=2, column=1)
-aufstieg = ttk.Entry(menu, width=80)
-aufstieg.grid(row=3, column=1)
-abstieg = ttk.Entry(menu, width=80)
-abstieg.grid(row=4, column=1)
-zeit = ttk.Entry(menu, width=80)
-zeit.grid(row=5, column=1)
+aufstieg = ttk.Entry(menu, width=13)
+aufstieg.grid(row=2, column=3)
+abstieg = ttk.Entry(menu, width=13)
+abstieg.grid(row=2, column=5)
+zeit = ttk.Entry(menu, width=13)
+zeit.grid(row=2, column=7)
 
 ### submit-button ###
 submit_button = ttk.Button(menu, text="fahrt hinzufügen", command=submit)
-submit_button.grid(row=6, column=1, padx=9, pady=5, sticky="w")
+submit_button.grid(row=3, column=1, padx=9, pady=5, sticky="w")
 
 ### Delete-Button ###
 delete_button = ttk.Button(menu, text="Fahrt löschen", command=delete)
-delete_button.grid(row=7, column=1, padx=9, pady=5, sticky="w")
+delete_button.grid(row=0, column=1, padx=9, pady=5, sticky="w")
 
 ### Update-Button ###
 edit_button = ttk.Button(menu, text="Fahrt bearbeiten", command=edit)
-edit_button.grid(row=8, column=1, padx=9, pady=5, sticky="w")
+edit_button.grid(row=0, column=3, padx=9, pady=5, sticky="w")
 
 ### Menu anzeigen
 menu.pack()
