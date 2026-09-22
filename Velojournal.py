@@ -4,9 +4,6 @@ import sqlite3
 
 """
 TODOs:
-- Fahrt lässt sich nicht zweimal bearbeiten - warum?
-- Eingabemaske für neue Einträge anders gestalten
-- Buttons "Fahrt löschen" bzw. "Fahrt bearbeiten" anders anordnen
 - widgets und events für suche und sortieren erstellen.
   - Prio 1: Suche in Zeitspanne
   - Prio 2: Suche nach Kilometern
@@ -120,15 +117,6 @@ def submit():
     abstieg.delete(0, tk.END)
     zeit.delete(0, tk.END)
 
-### Eintrag auswählen ###
-def select_record(e):
-    # grab record number
-    selected = table.focus() # selected = Zeilennummer Treeview
-
-    # grab record values
-    values = table.item(selected, 'values') # values = Tuple mit Werten aus Treeview (als strings)
-    # (value[6] == oid)
-
 ### eintrag updaten ###
 def update():
     # update record in database
@@ -161,8 +149,7 @@ def update():
     # grab the record number
     selected = table.focus()
     # update record in treeview
-    table.item(selected, text="", values=(datum_editor.get(), route_editor.get(),distanz_editor.get(), aufstieg_editor.get(), abstieg_editor.get(), zeit_editor.get(),))
-
+    table.item(selected, text="", values=(datum_editor.get(), route_editor.get(),distanz_editor.get(), aufstieg_editor.get(), abstieg_editor.get(), zeit_editor.get(), oid_edited,))
 
 ### Eintrag löschen ###
 def delete():
@@ -275,7 +262,7 @@ root.geometry("800x650")
 ## Treeview-Table ##
 
 ### Create the Frame ###
-tree_frame = ttk.Frame(root)
+tree_frame = ttk.Frame(root, borderwidth=10)
 tree_frame.pack()
 
 ### Create the Scrollbar ###
@@ -311,57 +298,62 @@ table.heading("Abstieg", text = "Abstieg", anchor=tk.CENTER)
 table.heading("Zeit", text = "Zeit", anchor=tk.CENTER)
 
 ### Frame Menu ###
-menu = ttk.Frame(root)
-
-### labels menu ###
-datum_label = ttk.Label(menu, text="Datum")
-datum_label.grid(row=1, column=0, padx=15, pady=5)
-route_label = ttk.Label(menu, text="Route")
-route_label.grid(row=1, column=2, pady=5)
-distanz_label = ttk.Label(menu, text="Distanz")
-distanz_label.grid(row=2, column=0, pady=5)
-aufstieg_label = ttk.Label(menu, text="Aufstieg")
-aufstieg_label.grid(row=2, column=2, pady=5)
-abstieg_label = ttk.Label(menu, text="Abstieg")
-abstieg_label.grid(row=2, column=4, pady=5)
-zeit_label = ttk.Label(menu, text="Zeit")
-zeit_label.grid(row=2, column=6, pady=5)
-
-### eingabefelder ###
-datum = ttk.Entry(menu, width=10)
-datum.grid(row=1, column=1, padx=10)
-route = ttk.Entry(menu, width=55)
-route.grid(row=1, column=3, columnspan=5)
-distanz = ttk.Entry(menu, width=10)
-distanz.grid(row=2, column=1)
-aufstieg = ttk.Entry(menu, width=13)
-aufstieg.grid(row=2, column=3)
-abstieg = ttk.Entry(menu, width=13)
-abstieg.grid(row=2, column=5)
-zeit = ttk.Entry(menu, width=13)
-zeit.grid(row=2, column=7)
-
-### submit-button ###
-submit_button = ttk.Button(menu, text="fahrt hinzufügen", command=submit)
-submit_button.grid(row=3, column=1, padx=9, pady=5, sticky="w")
+menu = ttk.Frame(root, borderwidth=10)
 
 ### Delete-Button ###
 delete_button = ttk.Button(menu, text="Fahrt löschen", command=delete)
-delete_button.grid(row=0, column=1, padx=9, pady=5, sticky="w")
+delete_button.grid(row=0, column=0, padx=15, pady=5, sticky="w")
 
 ### Update-Button ###
 edit_button = ttk.Button(menu, text="Fahrt bearbeiten", command=edit)
-edit_button.grid(row=0, column=3, padx=9, pady=5, sticky="w")
+edit_button.grid(row=0, column=1, padx=9, pady=5, sticky="w")
 
 ### Menu anzeigen
 menu.pack()
+
+### Frame newEntry ###
+newEntry = ttk.Frame(root, padding=10, borderwidth=1, relief="ridge")
+
+### labels newEnty ###
+datum_label = ttk.Label(newEntry, text="Datum")
+datum_label.grid(row=0, column=0, pady=5)
+route_label = ttk.Label(newEntry, text="Route")
+route_label.grid(row=0, column=2, pady=5)
+distanz_label = ttk.Label(newEntry, text="Distanz")
+distanz_label.grid(row=1, column=0, pady=5)
+aufstieg_label = ttk.Label(newEntry, text="Aufstieg")
+aufstieg_label.grid(row=1, column=2, padx=5, pady=5)
+abstieg_label = ttk.Label(newEntry, text="Abstieg")
+abstieg_label.grid(row=1, column=4, padx=5, pady=5)
+zeit_label = ttk.Label(newEntry, text="Zeit")
+zeit_label.grid(row=1, column=6, padx=5, pady=5)
+
+### eingabefelder ###
+datum = ttk.Entry(newEntry, width=10)
+datum.grid(row=0, column=1, padx=10)
+route = ttk.Entry(newEntry, width=45)
+route.grid(row=0, column=3, columnspan=5)
+distanz = ttk.Entry(newEntry, width=10)
+distanz.grid(row=1, column=1)
+aufstieg = ttk.Entry(newEntry, width=10)
+aufstieg.grid(row=1, column=3)
+abstieg = ttk.Entry(newEntry, width=10)
+abstieg.grid(row=1, column=5)
+zeit = ttk.Entry(newEntry, width=10)
+zeit.grid(row=1, column=7)
+
+### submit-button ###
+submit_button = ttk.Button(newEntry, text="Fahrt hinzufügen", command=submit)
+submit_button.grid(row=2, column=0, columnspan=2, padx=9, pady=10)
+
+### newEntry anzeigen
+newEntry.pack()
 
 ## Alle Änderungen übernehmen und Verbindung schliessen
 con.commit()
 con.close()
 
 # Bind the treeview
-table.bind("<ButtonRelease-1>", select_record) # select_record oben definiert
 table.bind("<Double-Button-1>", edit_in_editor) # Doppelklick für Editor
 
 # Anzeige der Daten aus Datenbank beim Start
